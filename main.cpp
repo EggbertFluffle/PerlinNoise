@@ -4,26 +4,13 @@
 #include <raylib.h> 
 #include <stdio.h>
 
-const int width = 600;
+const int width = 400;
 const int height = 400;
 
-void calculatePixels(perlinOffsets* po, float pixels[width][height]) {
-	po = createPerlinOffsets(4);
+const float frequency = 5.0f;
+const int octave = 4;
 
-	for(int x = 0; x < width; x++) {
-		for(int y = 0; y < height; y++) {
-			pixels[x][y] = 0;
-		}
-	}
-
-	for(int x = 0; x < width; x++) {
-		float p = getPerlinNoise(po, float(x) / float(width) * 10.0f);
-		int max = int((p + 1.0f) * (height / 2));
-		for(int y = height - 1; y >= max; y--) {
-			pixels[x][height - y] = 1;
-		}
-	}
-}
+void calculatePixels(perlinOffsets* po, float pixels[width][height], float frequency, int octaves);
 
 int main() {
 	InitWindow(width, height, "Perlin Noise");
@@ -36,7 +23,7 @@ int main() {
 
 	float pixels[width][height];
 
-	calculatePixels(po, pixels);
+	calculatePixels(po, pixels, frequency, octave);
 
 	while(!WindowShouldClose()) {
 		BeginDrawing();
@@ -44,7 +31,7 @@ int main() {
 
 		PollInputEvents();
 		if(IsKeyDown(KEY_R)) {
-			calculatePixels(po, pixels);
+			calculatePixels(po, pixels, frequency, octave);
 		} else if(IsKeyDown(KEY_Q)) {
 			CloseWindow();
 		}
@@ -63,3 +50,31 @@ int main() {
 	CloseWindow();
 	return 0;
 }
+
+void calculatePixels(perlinOffsets* po, float pixels[width][height], float frequency, int octaves) {
+	po = createPerlinOffsets(octaves);
+
+	for(int x = 0; x < width; x++) {
+		for(int y = 0; y < height; y++) {
+			pixels[x][y] = (getPerlinNoise(po, float(x) / float(width) * frequency, float(y) / float(height) * frequency) / 2.0f) + 0.5f;
+		}
+	}
+}
+
+// void calculatePixels(perlinOffsets* po, float pixels[width][height], float frequency, int octave) {
+// 	po = createPerlinOffsets(octave);
+//
+// 	for(int x = 0; x < width; x++) {
+// 		for(int y = 0; y < height; y++) {
+// 			pixels[x][y] = 0;
+// 		}
+// 	}
+//
+// 	for(int x = 0; x < width; x++) {
+// 		float p = getPerlinNoise(po, float(x) / float(width) * frequency);
+// 		int max = int((p + 1.0f) * (height / 2));
+// 		for(int y = height - 1; y >= max; y--) {
+// 			pixels[x][height - y] = 1;
+// 		}
+// 	}
+// }
